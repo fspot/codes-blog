@@ -1,0 +1,42 @@
+Date: 10/03/2013
+Title: Regex PCRE pour DTD
+Slug: regex-pcre-pour-dtd
+
+Dans le cadre du cours "grammaire et langages", on est amenés à devoir parser des fichiers XML et DTD et à vérifier que les fichiers XML respectent bien la DTD qu'ils utilisent.
+
+...
+
+Bingo, ça ne marche pas.
+Ligne 4, on fait appel à `ma_fonction`, qui associe la valeur `12` à l'identificateur `a`.
+Mais cette association n'a effet que dans la suite de cette fonction, jusqu'à sa fin.
+
+Si on fait l'inverse (c'est à dire si on crée la variable `a` avant l'appel de la fonction, et qu'on essaye d'afficher la variable `a` *dans* la fonction) :
+
+    :::python
+    def ma_fonction():
+        print(a)
+    
+    a = 12
+    print(a)
+
+Est-ce que cela va marcher ? On pourrait hésiter... La réponse est oui.
+
+Pourquoi ? Eh bien, ligne 2, quand Python voit qu'il doit afficher la variable `a`, il va procéder en deux étapes :
+
+ * Premièrement, il va regarder si une variable appelée `a` est déclarée au sein de `ma_fonction`. Il se trouve que non.
+ * Deuxièmement, il va regarder si une telle variable est déclarée en dehors de toute fonction. Et là, il se trouve que oui : ligne 4, on a affecté la valeur 12 à une variable `a`.
+
+
+
+
+Petite astuce
+-------------
+
+Il existe un moyen de visualiser quelles variables sont définies au sein d'une fonction
+
+Cet article inaugure cet espace, un blog statique *made with* Pelican.
+Il *devrait* me servir chaque fois que je voudrais écrire un article contenant un bout de code.
+
+    :::python
+    print 'python code'
+    squares = (i*i for i in xrange(42) if i not in (3,33))

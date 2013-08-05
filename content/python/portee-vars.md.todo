@@ -1,0 +1,98 @@
+Date: 02/11/2012
+Title: Portée des variables en Python
+Slug: portee-des-variables-en-python
+
+Pas mal de débutants en Python se heurtent à sa façon de gérer la portée des variables.
+Cet article tente donc d'expliquer, à travers un maximum d'exemples très simples, comment tout ça fonctionne.
+
+Mise en bouche
+--------------
+
+Soit le fichier `exemple.py` suivant :
+
+    :::python
+    a = 12
+    print(a)
+
+La première ligne associe l'identificateur `a` avec la valeur `12`.
+La deuxième ligne fonctionne car la variable `a` existe bel et bien. Preuve :
+
+    fred@atom ~ $ python exemple.py
+    12
+  
+Une première fonction
+---------------------
+
+Le code du fichier est maintenant celui-ci :
+
+    :::python
+    def ma_fonction():
+        a = 12
+        print(a)
+    
+    ma_fonction()
+
+**Rappel pour gros débutant** : ligne 1, je déclare une fonction qui aura pour nom `ma_fonction`, et ligne 5 j'y fais appel. Si j'enlevais la ligne 5, ce programme ne ferait donc absolument rien.
+
+Ce code est très semblable au précédent, sauf que cette fois ci, la variable `a` créée existera seulement au sein de la fonction et pas en dehors de celle-ci.
+
+Ce détail ne change rien au résultat de l'exécution :
+
+    fred@atom ~ $ python exemple.py
+    12
+
+Un cas intéressant (enfin)
+--------------------------
+
+Que se passe-t-il si on essaye de faire un `print(a)` à l'extérieur de la fonction ?
+Si la variable `a` existe seulement dans la fonction, cela ne devrait pas marche...
+
+    :::python
+    def ma_fonction():
+        a = 12
+    
+    ma_fonction()
+    print(a)
+
+Résultat :
+
+    fred@atom ~ $ python3 x.py 
+    Traceback (most recent call last):
+      File "x.py", line 5, in <module>
+        print(a)
+    NameError: name 'a' is not defined
+
+Bingo, ça ne marche pas.
+Ligne 4, on fait appel à `ma_fonction`, qui associe la valeur `12` à l'identificateur `a`.
+Mais cette association n'a effet que dans la suite de cette fonction, jusqu'à sa fin.
+
+Si on fait l'inverse (c'est à dire si on crée la variable `a` avant l'appel de la fonction, et qu'on essaye d'afficher la variable `a` *dans* la fonction) :
+
+    :::python
+    def ma_fonction():
+        print(a)
+    
+    a = 12
+    print(a)
+
+Est-ce que cela va marcher ? On pourrait hésiter... La réponse est oui.
+
+Pourquoi ? Eh bien, ligne 2, quand Python voit qu'il doit afficher la variable `a`, il va procéder en deux étapes :
+
+ * Premièrement, il va regarder si une variable appelée `a` est déclarée au sein de `ma_fonction`. Il se trouve que non.
+ * Deuxièmement, il va regarder si une telle variable est déclarée en dehors de toute fonction. Et là, il se trouve que oui : ligne 4, on a affecté la valeur 12 à une variable `a`.
+
+
+
+
+Petite astuce
+-------------
+
+Il existe un moyen de visualiser quelles variables sont définies au sein d'une fonction
+
+Cet article inaugure cet espace, un blog statique *made with* Pelican.
+Il *devrait* me servir chaque fois que je voudrais écrire un article contenant un bout de code.
+
+    :::python
+    print 'python code'
+    squares = (i*i for i in xrange(42) if i not in (3,33))
