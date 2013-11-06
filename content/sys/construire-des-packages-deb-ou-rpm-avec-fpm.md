@@ -8,6 +8,7 @@ Mais dans un contexte professionnel, les packages natifs présentent beaucoup d'
 FPM est un outil très simple qui permet de créer des packages .deb ou .rpm pour ses programmes.
 
 En réalité il va plus loin que cela, il peut générer des packages :
+
  - deb
  - rpm
  - solaris
@@ -15,12 +16,15 @@ En réalité il va plus loin que cela, il peut générer des packages :
  - tar
 
 Pour cela il peut se baser sur différents formats d'entrée. Vous pouvez lui passer des projets contenus dans un simple dossier (le plus simple), mais également des :
+
  - packages deb
  - packages rpm
  - gem (packages ruby)
  - packages python
  - pear (packages php)
  - npm (packages node)
+
+Cet article va présenter l'utilisation basique de FPM dans le cadre d'un micro-projet.
 
 Installation
 ------------
@@ -37,18 +41,18 @@ Sous CentOS :
     $ sudo gem install fpm
     $ sudo yum install rpm-build  # pour pouvoir générer des packages .rpm
 
+
 Utilisation
 -----------
 
 Imaginons un premier projet basique, où l'on voudrait créer un package pour un unique binaire. Prenons le hello world standard :
 
-   :::C
-   #include <stdio.h>
-   
-   int main(void) {
-       puts("Hello, world!");
-       return 0;
-   }
+    :::C
+    #include <stdio.h>   
+    int main(void) {
+        puts("Hello, world!");
+        return 0;
+    }
 
 Générons le binaire `myhellow` :
 
@@ -59,6 +63,7 @@ Générons le binaire `myhellow` :
     $ fpm -s dir -t deb -n myhellow -v 1.0 ./myhellow=/usr/local/bin/myhellow
 
 Explications des arguments passés :
+
  - `-s <type_input>` : pour dire si on passe en entrée un package deb, rpm, gem, npm... Ici on n'a rien de tout ça : on choisit `dir`
  - `-t <type_output>` : le format du package généré. Là on a choisi `deb`, mais on aurait pu choisir `rpm`, `solaris`...
  - `-n <package_name>` : le nom du package (qu'on retrouve habituellement en faisant `apt-get install <package_name>`)
@@ -89,3 +94,4 @@ Pour un package rpm :
     $ sudo yum remove package  # autre désinstallation
 
 Dans un prochain article éventuel, je présenterai une manière de packager un projet python complet (avec son virtualenv).
+

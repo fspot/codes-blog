@@ -3,7 +3,8 @@
 
 AUTHOR = u"Fred"
 SITENAME = u"Codes"
-SITEURL = ''
+SITEURL = 'http://fspot.org/plk/'
+MARKUP=('rst', 'md', 'markdown', 'html')
 
 TIMEZONE = 'Europe/Paris'
 
