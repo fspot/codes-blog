@@ -45,7 +45,7 @@ Sous CentOS :
 Utilisation
 -----------
 
-Imaginons un premier projet basique, où l'on voudrait créer un package pour un unique binaire. Prenons le hello world standard :
+Imaginons un premier projet basique, où l'on voudrait créer un package pour un unique binaire. Prenons un hello world standard :
 
     :::C
     #include <stdio.h>   
