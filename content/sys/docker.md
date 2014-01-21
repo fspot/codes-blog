@@ -40,7 +40,7 @@ Voici un exemple de Dockerfile trivial permettant de générer une image contena
     ENTRYPOINT ["nginx"]
 
 
-Cette image a été publiée sur l'index public Docker par l'utilisateur `dockerfile`, qui l'a nommée `nginx`. Pour récupérer cette image, il suffit d'entrer la commande suivante :
+Cette image a été construite à partir de ce Dockerfile (via la commande `docker build`) puis publiée (`docker push`) sur l'index public Docker par l'utilisateur `dockerfile`, qui l'a nommée `nginx`. Pour récupérer cette image, il suffit donc d'entrer la commande suivante :
 
 
     docker pull dockerfile/nginx
@@ -72,6 +72,7 @@ Interactions entre containers
 -----------------------------
 
 Soit une stack applicative traditionnelle pour un projet web:
+
 - nginx en serveur http : reverse proxy vers le serveur applicatif, et sert les fichiers statiques
 - gunicorn en serveur wsgi
 - django comme framework web et différents modules python (v2.7) nécessaires à l'application
@@ -82,11 +83,17 @@ On pourrait créer une image regroupant toute cette stack, mais ce n'est pas une
 
 Cependant, on a vu précédemment qu'un container en exécution était isolé. Heureusement, docker nous fournit de quoi faire interagir nos containers entre eux.
 
-### Volumes ?
+### Volumes (?)
+
+`todo`
 
 ### Links
 
+`todo`
+
 ### Pattern Ambassador
+
+`todo`
 
 ### Exemple concret
 
@@ -110,6 +117,8 @@ On préfère souvent avoir plusieurs petits serveurs applicatifs qu'un seul gros
            | PostGreSQL |
            +------------+
 
+
+`todo`
 
 
 Cas d'utilisation
