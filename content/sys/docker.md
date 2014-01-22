@@ -29,6 +29,7 @@ Voici un exemple de Dockerfile trivial permettant de générer une image contena
     RUN add-apt-repository -y ppa:nginx/stable
     RUN apt-get update
     RUN apt-get install -y nginx
+    RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
     
     # on change de répertoire de travail
     WORKDIR /etc/nginx
@@ -83,21 +84,53 @@ On pourrait créer une image regroupant toute cette stack, mais ce n'est pas une
 
 Cependant, on a vu précédemment qu'un container en exécution était isolé. Heureusement, docker nous fournit de quoi faire interagir nos containers entre eux.
 
-### Volumes (?)
+### Volumes
 
-`todo`
+Docker permet de partager des volumes entre containers (des portions du système de fichier). Ces volumes sont exclus de la gestion traditionnelle d'AUFS, et ne risquent pas d'être *committés*, tout en permettant une persistance des données. De manière plus intéressante, plusieurs containers peuvent se partager des volumes communs, permettant ainsi un partage de fichier malgré l'isolation du filesystem. Pour finir, on peut également partager un volume de l'hôte avec ses containers.
+
+À titre d'exemple, l'image `paintedfox/postgresql` permet de lancer une instance de postgresql dont les données seront dans un volume spécifié.
+
+
+    # les données de postgresql seront persistées dans /tmp/pg
+    docker run -d -p 5432:5432 -v /tmp/pg:/data paintedfox/postgresql
+
 
 ### Links
 
-`todo`
+Dans le même registre, docker permet de créer des liens entre les containers, afin de s'affranchir du minimum d'isolation nécessaire à une découverte et une communication réseau avec d'autres containers.
 
-### Pattern Ambassador
+Avant que cette possibilité soit intégrée à docker, il était toujours possible de passer directement par les adresses ip des containers et de réaliser un contrôleur réalisant l'orchestration. Mais depuis que cette fonctionnalité est présente, il est recommandé de rendre impossible la communication entre containers quand celle ci n'est pas explicitement demandée grâce aux links.
 
-`todo`
+La mise en place d'un link, du point de vue du container, se concrétise par le positionnement de différentes variables d'environnements, permettant la découverte des containers liés.
+
+Exemple avec un link :
+
+    root@xub:~/# docker ps
+    CONTAINER ID        IMAGE               COMMAND                CREATED             STATUS              PORTS                    NAMES
+    ae3a6d879bd2        myapp:latest        /bin/sh -c python ap   29 minutes ago      Up 29 minutes       0.0.0.0:5000->5000/tcp   sad_einstein        
+    root@xub:~/# docker run -i -t -rm -link sad_einstein:foo ubuntu bash
+    root@2a5aed07acc1:/# env
+    FOO_NAME=/stupefied_bardeen/foo
+    FOO_PORT=tcp://172.17.0.12:5000
+    FOO_PORT_5000_TCP=tcp://172.17.0.12:5000
+    FOO_PORT_5000_TCP_PORT=5000
+    FOO_PORT_5000_TCP_PROTO=tcp
+    FOO_PORT_5000_TCP_ADDR=172.17.0.12
+    HOSTNAME=2a5aed07acc1
+    TERM=xterm
+    PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    PWD=/
+    SHLVL=1
+    HOME=/
+    container=lxc
+    _=/usr/bin/env
+    root@2a5aed07acc1:/#
+
+La variable `FOO_PORT` résume à elle seule le lien existant vers le container `sad_einstein` (`foo` est le nom d'alias, `sad_einstein` est un nom généré aléatoirement par docker, on peut en spécifier un avec `-name`).
 
 ### Exemple concret
 
-On préfère souvent avoir plusieurs petits serveurs applicatifs qu'un seul gros, afin de minimiser les dégâts quand l'un d'eux tombe.
+Soit l'exemple suivant :
 
 
            +------------+
@@ -110,22 +143,45 @@ On préfère souvent avoir plusieurs petits serveurs applicatifs qu'un seul gros
     | Django on |  | Django on |
     | Gunicorn  |  | Gunicorn  |
     +-----------+  +-----------+
-             +       +
-             |       |
-             v       v
-           +------------+
-           | PostGreSQL |
-           +------------+
 
 
-`todo`
+On peut l'obtenir facilement en lançant 2 containers Django et un 3e avec nginx en reverse proxy en load balancing sur les 2 premiers. En cherchant les adresses IP et les ports des deux containers Django (*via* les variables d'environnement vues précédemment, ou, plus salement, *via* la commande `docker inspect <container>`), on peut arriver à cette conf :
 
 
-Cas d'utilisation
------------------
+    upstream myapp {
+        server 172.17.0.12:5000;
+        server 172.17.0.15:5000;
+    }
+
+
+Cependant, ces valeurs en dur dans la configuration ne sont pas du tout satisfaisantes : un moyen de les éviter serait de générer ces fichiers de configuration à partir de templates lors du démarrage du container, en se basant sur les variables d'environnements issues des `links`. Pour les applications sur lesquelles on a la main, on peut directement traiter ces variables dans le code applicatif : le fait qu'elles soient fournis par docker ou non est transparent.
+
+### Pattern Ambassador
+
+Dans des cas réels, tous nos containers auront peu de chance d'être sur la même machine. Malheureusement, le `link` ne fonctionne qu'au sein d'une même machine hôte.
+
+Pour compenser cela, l'idéal est d'utiliser un agent intermédiaire, permettant de ne pas polluer les containers métier avec la gestion des containers distants. Le *pattern ambassador* suit ce modèle :
+
+
+    # Exemple avec un client et un serveur redis
+    (consumer) --> (redis-ambassador) ---network---> (redis-ambassador) --> (redis)
+
+
+Dans ce schéma, l'ambassadeur est un container dont l'unique rôle est de mettre en place un tunnel vers son homologue et d'exposer ses ports.
+
+Cas d'utilisations de docker
+----------------------------
 
 Docker a à peine un an et de nombreux cas d'utilisation restent à découvrir.
 Le plus évoqué est la création de solutions PaaS ou SaaS basées sur Docker (cf. [Deis](http://deis.io) ou [Flynn](https://flynn.io)). Pour ce qui est du paiement, ces solutions tirent parti de la capacité des containers à limiter et tracer leur consommation mémoire et entrées/sorties.
 Également, Docker peut être ajouté au processus d'intégration et de déploiement continu : construction d'une image, `push` sur l'index (privé), `pull` sur les serveurs de qualification, exécution des tests d'intégration, `pull` sur les serveurs de production.
 On voit également apparaître des usages visant à fournir aux membres d'une équipe un environnement de développement uniforme, résolvant les problèmes de dépendances, et homogène avec l'état de la production.
 Docker peut aussi remplacer de fastidieuses installations d'applications par un simple `docker pull`.
+
+Dans de nombreux cas, docker se place en concurrent des traditionnelles machines virtuelles. S'il reste confiné à certains environnements, il est cependant incroyablement plus léger. À titre d'exemple, mon laptop a supporté sans broncher 150 containers de nginx (chaque container possédant 1 master + 4 workers nginx).
+
+Limites
+-------
+
+En terme de rapidité et d'espace disque, les containers ne sont pas si légers que cela. A titre d'exemple, l'image `postgresql` précédente m'a pris 8 minutes à récupérer (136 Mo), en possédant pourtant l'image `ubuntu` sur laquelle elle se base. Dans des cas moins favorables (i.e. à la campagne), j'ai même eu droit à des timeouts.
+En termes de sécurité, une connaissance pointue du fonctionnement des linux containers est requise pour maîtriser les risques. Cependant, même en souffrant d'un niveau d'isolation moindre, il semblerait que les containers ne soit pas beaucoup plus dangereux que des machines virtuelles. Voir le [billet de blog](http://blog.docker.io/2013/08/containers-docker-how-secure-are-they/) de dotcloud sur le sujet.
