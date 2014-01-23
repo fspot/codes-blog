@@ -1,7 +1,6 @@
 Date: 21/01/2014
 Title: Docker
 Slug: docker
-Status: draft
 
 Présentation
 ------------
@@ -16,7 +15,7 @@ Dockerfiles
 -----------
 
 Dans la terminologie utilisée par Docker, un *container* est une instanciation d'une *image*.
-La génération d'une image peut être scriptée dans un fichier `Dockerfile`. Ce fichier, pour l'essentiel, décrit les étapes nécessaires à la préparation de notre image, et doit s'appuyer sur une image préexistante. Par exemple, on peut baser notre image sur une image vierge d'ubuntu 12.04, disponible dans l'[index public d'images Docker](https://index.docker.io).
+La génération d'une image peut être idéalement scriptée dans un fichier `Dockerfile`. Ce fichier, pour l'essentiel, décrit les étapes nécessaires à la préparation de notre image, et doit s'appuyer sur une image préexistante. Par exemple, on peut baser notre image sur une image vierge d'ubuntu 12.04, disponible dans l'[index public d'images Docker](https://index.docker.io).
 
 Voici un exemple de Dockerfile trivial permettant de générer une image contenant l'application nginx (un serveur http). Les commandes parlent d'elles même.
 
@@ -95,13 +94,15 @@ Docker permet de partager des volumes entre containers (des portions du système
     docker run -d -p 5432:5432 -v /tmp/pg:/data paintedfox/postgresql
 
 
+Si l'option `-v /tmp/pg:/data` n'avait pas été passée, les données n'auraient pas été persistées à la fin de l'exécution du container (en réalité, on aurait pu les retrouver en *commitant* l'état précédent du container afin d'en faire une nouvelle image). En effet, à chaque lancement, docker part de l'état figé de l'image passée en paramètre (ici, `paintedfox/postgresql`).
+
 ### Links
 
 Dans le même registre, docker permet de créer des liens entre les containers, afin de s'affranchir du minimum d'isolation nécessaire à une découverte et une communication réseau avec d'autres containers.
 
 Avant que cette possibilité soit intégrée à docker, il était toujours possible de passer directement par les adresses ip des containers et de réaliser un contrôleur réalisant l'orchestration. Mais depuis que cette fonctionnalité est présente, il est recommandé de rendre impossible la communication entre containers quand celle ci n'est pas explicitement demandée grâce aux links.
 
-La mise en place d'un link, du point de vue du container, se concrétise par le positionnement de différentes variables d'environnements, permettant la découverte des containers liés.
+La mise en place d'un link, du point de vue du container, se concrétise par le positionnement de différentes variables d'environnements, permettant la découverte des containers liés, auxquels on a accès.
 
 Exemple avec un link :
 
@@ -172,16 +173,23 @@ Dans ce schéma, l'ambassadeur est un container dont l'unique rôle est de mettr
 Cas d'utilisations de docker
 ----------------------------
 
-Docker a à peine un an et de nombreux cas d'utilisation restent à découvrir.
-Le plus évoqué est la création de solutions PaaS ou SaaS basées sur Docker (cf. [Deis](http://deis.io) ou [Flynn](https://flynn.io)). Pour ce qui est du paiement, ces solutions tirent parti de la capacité des containers à limiter et tracer leur consommation mémoire et entrées/sorties.
-Également, Docker peut être ajouté au processus d'intégration et de déploiement continu : construction d'une image, `push` sur l'index (privé), `pull` sur les serveurs de qualification, exécution des tests d'intégration, `pull` sur les serveurs de production.
-On voit également apparaître des usages visant à fournir aux membres d'une équipe un environnement de développement uniforme, résolvant les problèmes de dépendances, et homogène avec l'état de la production.
-Docker peut aussi remplacer de fastidieuses installations d'applications par un simple `docker pull`.
+Docker a à peine un an et de nombreux cas d'utilisation restent à découvrir.  
+Le plus évoqué est la création de solutions PaaS ou SaaS basées sur Docker (cf. [Deis](http://deis.io) ou [Flynn](https://flynn.io)). Pour ce qui est du paiement, ces solutions tirent parti de la capacité des containers à limiter et tracer leur consommation mémoire et entrées/sorties. Ces solutions combinent docker a des outils d'orchestration type Puppet, Chef, Salt, Ansible, etc, qui tirent profit de la légèreté des containers et de la facilité de déploiement de ceux cis (`docker pull && docker run`).  
+Également, Docker peut être ajouté au processus d'intégration et de déploiement continu : construction d'une image, `push` sur l'index (privé), `pull` sur les serveurs de qualification, exécution des tests d'intégration (en massivement parallèle si nécessaire, chose rendue possible grâce à la légèreté des containers), `pull` sur les serveurs de production.  
+On voit également apparaître des usages visant à fournir aux membres d'une équipe un environnement de développement uniforme, résolvant les problèmes de dépendances, et homogène avec l'état de la production.  
+Enfin, docker peut aussi remplacer de fastidieuses installations d'applications complexes par un simple `docker pull`.
 
-Dans de nombreux cas, docker se place en concurrent des traditionnelles machines virtuelles. S'il reste confiné à certains environnements, il est cependant incroyablement plus léger. À titre d'exemple, mon laptop a supporté sans broncher 150 containers de nginx (chaque container possédant 1 master + 4 workers nginx).
+Dans de nombreux cas, docker se place en concurrent des traditionnelles machines virtuelles. S'il reste confiné à certains environnements, il est cependant incroyablement plus léger. À titre d'exemple, mon laptop a supporté sans broncher 150 containers de nginx (chaque container possédant 1 process master + 4 workers nginx).
 
 Limites
 -------
 
-En terme de rapidité et d'espace disque, les containers ne sont pas si légers que cela. A titre d'exemple, l'image `postgresql` précédente m'a pris 8 minutes à récupérer (136 Mo), en possédant pourtant l'image `ubuntu` sur laquelle elle se base. Dans des cas moins favorables (i.e. à la campagne), j'ai même eu droit à des timeouts.
-En termes de sécurité, une connaissance pointue du fonctionnement des linux containers est requise pour maîtriser les risques. Cependant, même en souffrant d'un niveau d'isolation moindre, il semblerait que les containers ne soit pas beaucoup plus dangereux que des machines virtuelles. Voir le [billet de blog](http://blog.docker.io/2013/08/containers-docker-how-secure-are-they/) de dotcloud sur le sujet.
+En terme de rapidité et d'espace disque, les containers ne sont pas si légers que cela. A titre d'exemple, l'image `postgresql` précédente m'a pris 8 minutes à récupérer (136 Mo), en possédant pourtant l'image `ubuntu` sur laquelle elle se base. Dans des cas moins favorables (i.e. à la campagne), j'ai même eu droit à des timeouts.  
+En termes de sécurité, une connaissance pointue du fonctionnement des linux containers est requise pour maîtriser les risques. Cependant, même en souffrant d'un niveau d'isolation moindre, il semblerait que les containers ne soit pas beaucoup plus dangereux que des machines virtuelles. Voir le [billet de blog](http://blog.docker.io/2013/08/containers-docker-how-secure-are-they/) de dotcloud sur le sujet.  
+Le souci des prérequis au niveau système tend à disparaitre.
+
+Conclusion
+----------
+
+Au vu de ses capacités et de son évolution, docker semble promis à un bel avenir pour packager simplement ses applications, et constitue une excellente sous-couche combinée à des outils d'orchestration pour la mise en place de ses propres procédures d'intégration et de déploiement.  
+Pour plus d'infos : la doc est très abordable sur [docker.io](https://docker.io), avec un tuto interactif et des QCM en prime.
