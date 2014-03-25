@@ -1,0 +1,30 @@
+Date: 22/10/2013
+Title: SSH pas à pas
+Slug: ssh-pas-a-pas
+Status: draft
+
+Cet article a pour but de présenter l'utilisation de `ssh` et des différentes commandes associées.
+J'espère qu'il sera à la fois un bon mémo et un bon guide pour découvrir progressivement comment utiliser au mieux cet outil.
+
+Prérequis
+---------
+
+Savoir utiliser basiquement `ssh` pour se connecter à un serveur. Par exemple, chez moi, pour me connecter à mon raspberry pi :
+
+	$ ssh pi@192.168.1.15
+
+Si le serveur ssh écoute sur un autre port (ou si on a mis en place une redirection de ports sur la box), on peut préciser le port avec l'option `-p` :
+
+	$ ssh pi@192.168.1.15 -p 2222
+
+Le port par défaut étant 22.
+
+Le fichier ~/.ssh/known_hosts
+-----------------------------
+
+Les clés
+--------
+
+Le fichier ~/.ssh/authorized_keys
+---------------------------------
+
