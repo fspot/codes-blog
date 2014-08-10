@@ -21,8 +21,8 @@ Il est ouvertement inspiré de [zencancan](http://zencancan.com). Ce dernier aff
 
 Après avoir utilisé personnellement zenCancan pendant de nombreuses années, j'en étais très satisfait, à quelques petits points près :
 
-- l'interface est un peu vieillotte, et n'est pas adaptée aux mobiles. J'aimerai avoir une interface adaptée à la lecture.
-- j'aurai aimé, pour **certains** flux que je considère comme importants, une mise en évidence visuelle lorsque des nouvelles y sont apparues (cela vient un peu contredire l'esprit originel de zenCancan)
+- l'interface est un peu vieillotte, et n'est pas adaptée aux mobiles. J'aimerais avoir une interface adaptée à la lecture.
+- j'aurais aimé, pour **certains** flux que je considère comme importants, une mise en évidence visuelle lorsque des nouvelles y sont apparues (cela vient un peu contredire l'esprit originel de zenCancan)
 - je n'ai jamais utilisé le système d'étiquettes (tags / catégories)
 - rien n'est paramétrable (pagination, intervalles entre les récupérations de flux…)
 - zenCancan ne sauvegarde pas les news qui ne sont plus présentes dans le flux RSS, ce qui limite le nombre d'entrées à seulement une dizaine dans la plupart des cas (et inversement, à beaucoup trop dans d'autre cas).
