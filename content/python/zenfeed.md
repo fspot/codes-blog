@@ -5,7 +5,7 @@ Slug: zenfeed
 Présentation
 ============
 
-Un dicton populaire nous dt que "si à 23 ans, t'as pas écrit ton lecteur RSS, t'as raté ta vie (de développeur)". C'est pour cela, et pour quelques autres raisons, que j'ai écrit le mien, [zenfeed](https://github.com/fspot/zenfeed), qui vient s'ajouter à la longue liste des lecteurs RSS en ligne, aux cotés de :
+Un dicton populaire nous dit que "si à 23 ans, t'as pas écrit ton lecteur RSS, t'as raté ta vie (de développeur)". C'est pour cela, et pour quelques autres raisons, que j'ai écrit le mien, [zenfeed](https://github.com/fspot/zenfeed), qui vient s'ajouter à la longue liste des lecteurs RSS en ligne, aux cotés de :
 
 - feu Google Reader ou Feedly, pour citer les services propriétaires
 - miniflux, Leed, tiny tiny RSS, RSSLounge ou Kriss Feed (la liste est longue) pour les alternatives libres
